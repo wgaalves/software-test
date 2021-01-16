@@ -32,8 +32,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     public final ResponseEntity<Object> handleNotFoundExeceptions(Exception ex, WebRequest request) {
         List<String> details = new ArrayList<>();
         details.add(ex.getLocalizedMessage());
-        ErrorResponse error = new ErrorResponse("Validation Failed", details);
-        return new ResponseEntity(error, HttpStatus.NOT_FOUND);
+        //ErrorResponse error = new ErrorResponse("Validation Failed", details);
+        return new ResponseEntity(0, HttpStatus.NOT_FOUND);
     }
 
     @Override

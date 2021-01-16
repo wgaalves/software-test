@@ -19,19 +19,19 @@ public class AccountController {
 
     private AccountService accountService;
 
-    @GetMapping( value = "/reset")
+    @PostMapping( value = "/reset")
     public ResponseEntity<String> reset() {
         accountService.reset();
-        return ResponseEntity.status(HttpStatus.OK).body("");
+        return ResponseEntity.status(HttpStatus.OK).body("OK");
     }
 
-    @GetMapping(produces = "application/json", value = "v1/balance")
-    public ResponseEntity<Account> balance(@Valid @RequestParam String account_id) {
+    @GetMapping(produces = "application/json", value = "/balance")
+    public ResponseEntity<Integer> balance(@Valid @RequestParam String account_id) {
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(accountService.balance(account_id));
+        return ResponseEntity.status(HttpStatus.OK).body(accountService.balance(account_id).getBalance());
     }
 
-    @PostMapping(consumes = "application/json", produces = "application/json", value = "v1/events")
+    @PostMapping(consumes = "application/json", produces = "application/json", value = "/event")
     public ResponseEntity<Object> events( @RequestBody AccountDTO event) {
         return ResponseEntity.status(HttpStatus.CREATED).body(accountService.handleEvent(event));
     }

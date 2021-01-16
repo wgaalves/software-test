@@ -4,7 +4,7 @@ import lombok.*;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import java.math.BigDecimal;
+
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,5 +15,5 @@ public class Account {
 
   @Id private String id;
 
-  private BigDecimal balance;
+  private Integer balance;
 }

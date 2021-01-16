@@ -5,12 +5,14 @@ import com.ebanx.test.dto.AccountDTO;
 import com.ebanx.test.exception.NotFoundException;
 import com.ebanx.test.repository.AccountRepository;
 import lombok.AllArgsConstructor;
+import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 
+@Log
 @AllArgsConstructor
 @Service
 public class AccountService {
@@ -38,45 +40,49 @@ public class AccountService {
   public Object deposit(AccountDTO accountDTO) {
     Account account;
 
-    if (!accountRepository.existsById(accountDTO.getId())) {
+    if (!accountRepository.existsById(accountDTO.getDestination())) {
       account = accountDTO.toDomain();
     } else {
-      account = accountRepository.getById(accountDTO.getId());
-      BigDecimal amount = account.getBalance().add(accountDTO.getAmount());
-      account.setBalance(amount);
+      account = accountRepository.getById(accountDTO.getDestination());
+      account.setBalance(account.getBalance() + accountDTO.getAmount());
     }
     accountRepository.save(account);
     return populateHashMap(account, null);
   }
 
   public Object withdraw(AccountDTO accountDTO) {
-    if (accountRepository.existsById(accountDTO.getId())) {
-      Account account = accountRepository.getById(accountDTO.getId());
-      BigDecimal amount = account.getBalance().subtract(accountDTO.getAmount());
+    if (accountRepository.existsById(accountDTO.getOrigin())) {
+      Account account = accountRepository.getById(accountDTO.getOrigin());
+      Integer amount = account.getBalance() - accountDTO.getAmount();
       account.setBalance(amount);
-      accountRepository.save(accountDTO.toDomain());
+      accountRepository.save(account);
       return populateHashMap(null, account);
     }
     throw new NotFoundException("Account Not Found");
   }
 
   public Object transfer(AccountDTO accountDTO) {
-    if (accountRepository.existsById(accountDTO.getId())
-        || accountRepository.existsById(accountDTO.getOrigin())) {
-      Account origin = accountRepository.getById(accountDTO.getId());
-      Account destination = accountRepository.getById(accountDTO.getOrigin());
-
-      BigDecimal originAmount = origin.getBalance().subtract(accountDTO.getAmount());
-      BigDecimal destinationAmount = destination.getBalance().add(accountDTO.getAmount());
+    if (accountRepository.existsById(accountDTO.getOrigin())) {
+      Account origin = accountRepository.getById(accountDTO.getOrigin());
+      Account destination;
+      Integer originAmount = origin.getBalance() - accountDTO.getAmount();
       origin.setBalance(originAmount);
-      destination.setBalance(destinationAmount);
-
       accountRepository.save(origin);
-      accountRepository.save(destination);
 
+      if (accountRepository.existsById(accountDTO.getDestination())) {
+
+        destination = accountRepository.getById(accountDTO.getDestination());
+        Integer destinationAmount = destination.getBalance() + accountDTO.getAmount();
+        destination.setBalance(destinationAmount);
+
+      } else {
+
+        destination = new Account();
+        destination.setId(accountDTO.getDestination());
+        destination.setBalance(accountDTO.getAmount());
+      }
+      accountRepository.save(destination);
       return populateHashMap(destination, origin);
-    } else if (!accountRepository.existsById(accountDTO.getId())) {
-      throw new NotFoundException("Account Origin Not Found");
     } else {
       throw new NotFoundException("Account Destiny Not Found");
     }
