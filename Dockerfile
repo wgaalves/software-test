@@ -1,4 +1,16 @@
-FROM graalvm/java11:latest
+FROM oracle/graalvm-ce:20.2.0-java11
+
+RUN yum update -y && yum install -y \
+        wget \
+        htop \
+        curl \
+        tar \
+        vim \
+        tzdata \
+        && yum clean all
+
+RUN ln -sf /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime
+
 
 VOLUME /tmp
 
